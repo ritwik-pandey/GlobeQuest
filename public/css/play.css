@@ -1,3 +1,57 @@
 body{
     background-image: url('../img/map.jpeg');
+    background-size: cover;
 }
+
+.container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+.leaderboard {
+  flex: 1;              /* takes equal share */
+  max-width: 15%; 
+  max-height: 50%;
+  background: #242130;
+  color: white;
+  padding: 20px;
+  margin-top: 30px;
+  margin-left: 30px;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+  overflow-y: auto;
+  opacity: 0.6;
+  border-radius: 10px;
+}
+
+.leaderboard h2 {
+  margin-bottom: 15px;
+  font-size: 20px;
+  text-align: center;
+}
+
+.leaderboard ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.leaderboard li {
+  display: flex;
+  justify-content: space-between;
+  background: #2a2a40;
+  margin: 5px 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.leaderboard li span {
+  font-weight: bold;
+}
+
+.game-area {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+

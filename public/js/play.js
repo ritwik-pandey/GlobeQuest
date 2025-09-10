@@ -32,23 +32,14 @@ async function initPlay() {
   const roomData = snap.data();
   if (roomData.gameState !== 'in-game') return goToLobby();
 
-  // At this point the player may view the play page.
-  // Render players
-//   const playersContainer = document.getElementById('playersContainer');
-//   playersContainer.innerHTML = '';
-//   (roomData.players || []).forEach(p => {
-//     const el = document.createElement('div');
-//     el.className = 'player-row';
-//     el.textContent = `${p.nickname} (${p.userId})`;
-//     playersContainer.appendChild(el);
-//   });
+  
 
   // Optionally listen for updates (optional)
   onSnapshot(roomRef, ds => {
     if (!ds.exists()) return goToLobby();
     const rd = ds.data();
     if (rd.gameState !== 'in-game') return goToLobby();
-    // update players UI if needed...
+    renderLeaderboard(rd.players || []);
   });
 }
 
@@ -58,3 +49,20 @@ onAuthStateChanged(auth, (user) => {
   // optional: if you don't rely on auth here, call initPlay() directly
   initPlay();
 });
+
+const leaderboardList = document.getElementById("leaderboard-list");
+
+function renderLeaderboard(players) {
+  // sort by points descending
+  players.sort((a, b) => (b.points || 0) - (a.points || 0));
+
+  leaderboardList.innerHTML = "";
+  players.forEach((p, index) => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <span>${index + 1}. ${p.nickname}</span>
+      <span>${p.points || 0}</span>
+    `;
+    leaderboardList.appendChild(li);
+  });
+}
