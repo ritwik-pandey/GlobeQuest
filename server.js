@@ -11,8 +11,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 const lobbyRoute = require('./routes/lobby');
-
+const playRoute = require('./routes/play');
 app.use('/lobby',lobbyRoute);
+app.use('/play', playRoute);
 
 app.get('/',(req,res)=>{
     console.log("I am here");

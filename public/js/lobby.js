@@ -5,19 +5,12 @@ import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, arrayUnion, a
 
 // --- Firebase Configuration ---
 const firebaseConfig = {
-
   apiKey: "AIzaSyDcoLHRVLcuAu02hz4YXkriRLuJwZv_imc",
-
   authDomain: "globequest-4616a.firebaseapp.com",
-
   projectId: "globequest-4616a",
-
   storageBucket: "globequest-4616a.firebasestorage.app",
-
   messagingSenderId: "711348925342",
-
   appId: "1:711348925342:web:5c6fd823666c06847ddc8f",
-
   measurementId: "G-44WK01SXHC"
 
 };
@@ -119,7 +112,7 @@ function renderLobby(roomData) {
         }
     });
     
-    if (allReady && players.length >= 2) {
+    if (allReady ) {
         allReadyMessage.classList.remove('hidden');
         if (currentUser.uid === roomData.hostId && !isStartingGame) {
             isStartingGame = true;
@@ -139,7 +132,7 @@ function switchToLoginView() {
     currentRoomCode = null;
     isStartingGame = false;
     playerList.innerHTML = '';
-    
+    sessionStorage.removeItem('roomCode');  // <-- CLEAR
     lobbyView.classList.add('hidden');
     gameView.classList.add('hidden');
     loginView.classList.remove('hidden');
@@ -148,6 +141,7 @@ function switchToLoginView() {
 function switchToLobbyView(roomCode) {
     currentRoomCode = roomCode;
     roomCodeDisplay.textContent = roomCode;
+        sessionStorage.setItem('roomCode', roomCode);   
     loginView.classList.add('hidden');
     gameView.classList.add('hidden');
     lobbyView.classList.remove('hidden');
@@ -174,6 +168,7 @@ async function startGameWithCountdown(roomCode) {
         if (countdown === 0) {
             clearInterval(interval);
             await updateDoc(roomRef, { gameState: 'in-game' });
+            window.location.href = `/play?roomCode=${encodeURIComponent(roomCode)}`;
         }
     }, 1000);
 }
@@ -190,6 +185,7 @@ function listenToRoom(roomCode) {
                 renderLobby(roomData);
             } else if (roomData.gameState === 'in-game') {
                 switchToGameView();
+                window.location.href = `/play?roomCode=${encodeURIComponent(roomCode)}`;
             }
         } else {
             showMessage("The host has closed the room.");
