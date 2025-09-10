@@ -19,6 +19,42 @@ const auth = getAuth(app);
 
 function goToLobby() { window.location.href = "/lobby"; }
 
+const imageElement = document.getElementById('clickableImage');
+const outputElement = document.getElementById('coordinatesOutput');
+const imageContainer = document.querySelector('.image-container');
+
+// Add a click event listener to the image
+imageElement.addEventListener('click', (event) => {
+    // Get the bounding box of the image, which gives us its position on the page
+    const rect = imageElement.getBoundingClientRect();
+
+    // Calculate the x-coordinate relative to the image
+    const x = Math.floor(event.clientX - rect.left);
+
+    // Calculate the y-coordinate relative to the image
+    const y = Math.floor(event.clientY - rect.top);
+    
+    // Check if a highlight dot already exists
+    let highlightDot = document.getElementById('highlight-dot');
+    if (!highlightDot) {
+        // If not, create a new one
+        highlightDot = document.createElement('div');
+        highlightDot.id = 'highlight-dot';
+        imageContainer.appendChild(highlightDot);
+    }
+
+    // Position the dot at the clicked coordinates. 
+    // The 'transform' CSS property centers it on the click point.
+    highlightDot.style.left = `${x}px`;
+    highlightDot.style.top = `${y}px`;
+
+    // Update the text in the output element with the coordinates
+    console.log(x);
+    console.log(y);
+    
+    
+});
+
 async function initPlay() {
   // get roomCode from URL or sessionStorage
   const urlParams = new URLSearchParams(window.location.search);
@@ -66,3 +102,4 @@ function renderLeaderboard(players) {
     leaderboardList.appendChild(li);
   });
 }
+

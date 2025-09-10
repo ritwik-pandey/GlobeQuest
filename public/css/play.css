@@ -1,27 +1,66 @@
-body{
-    background-image: url('../img/map.jpeg');
-    background-size: cover;
+body, html {
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent scrolling if image fills the screen */
 }
 
 .container {
   display: flex;
   height: 100vh;
   width: 100vw;
+  position: relative;
 }
 
-.leaderboard {
-  flex: 1;              /* takes equal share */
-  max-width: 15%; 
-  max-height: 50%;
-  background: #242130;
-  color: white;
-  padding: 20px;
-  margin-top: 30px;
-  margin-left: 30px;
-  box-shadow: 2px 0 8px rgba(0,0,0,0.3);
-  overflow-y: auto;
-  opacity: 0.6;
-  border-radius: 10px;
+.image-container {
+  position: fixed;  /* Fix position to cover viewport */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;       /* Behind other content */
+  overflow: hidden;
+}
+
+.image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Cover full area without distortion */
+  display: block;
+}
+
+.image-container img.marker {
+  position: absolute;
+      /* adjust X coordinate */
+  width: 30px;    /* size of the small image */
+  height: 30px;
+  z-index: 5;     /* above the background image */
+  cursor: pointer; /* optional */
+}
+
+#delhi{
+    top: 40%;
+    right: 20%;
+}
+
+#san{
+    top: 30%;
+    left: 20%;
+}
+
+#paris{
+    top:25%;
+    right: 41%;
+}
+
+#cape{
+    top: 71%;
+    right: 37%;
+}
+
+#toro{
+    top: 26%;
+    left:35%;  
 }
 
 .leaderboard h2 {
@@ -49,9 +88,18 @@ body{
   font-weight: bold;
 }
 
-.game-area {
-  flex: 1;
+.leaderboard {
+  flex: 1;              /* takes equal share */
+  max-width: 15%; 
+  max-height: 50%;
+  background: #242130;
+  color: white;
   padding: 20px;
+  margin-top: 30px;
+  margin-left: 30px;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.3);
   overflow-y: auto;
+  opacity: 0.6;
+  border-radius: 10px;
+  z-index: 10;
 }
-
