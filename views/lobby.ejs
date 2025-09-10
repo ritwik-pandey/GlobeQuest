@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlobeQuest - Enter the Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/lobby.css">
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <div id="appContainer" class="w-full max-w-md mx-auto p-4">
+
+        <!-- Login/Room Entry View -->
+        <div id="loginView" class="card p-8 text-center">
+            <h1 class="text-4xl font-bold text-teal-300 mb-2 tracking-wide">🌍 GlobeQuest</h1>
+            <p class="text-lg text-gray-300 mb-6">Travel Smart, Win Smarter!</p>
+            <p class="text-gray-400 mb-8">
+                Enter your nickname and either create a new room for your friends or join one with a code.
+            </p>
+
+            <div class="space-y-4">
+                <input type="text" id="nicknameInput" placeholder="Enter Your Name" class="input-field w-full px-4 py-3 rounded-lg text-lg">
+                <input type="text" id="roomCodeInput" placeholder="Enter Room Code (optional)" class="input-field w-full px-4 py-3 rounded-lg text-lg">
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-4 mt-8">
+                <button id="createRoomBtn" class="btn btn-create w-full py-3 px-6 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Create Room
+                </button>
+                <button id="joinRoomBtn" class="btn btn-join w-full py-3 px-6 rounded-lg">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg>
+                    Join Room
+                </button>
+            </div>
+        </div>
+
+        <!-- Multiplayer Lobby View -->
+        <div id="lobbyView" class="hidden card p-8 text-center">
+            <h2 class="text-2xl font-bold text-gray-300 mb-4 tracking-wide">Lobby</h2>
+            <div class="mb-6">
+                <p class="text-gray-400">Share this code with your friends:</p>
+                <div class="flex items-center justify-center gap-2 mt-2">
+                    <span id="roomCodeDisplay" class="text-3xl font-extrabold text-teal-300 bg-slate-900/50 px-4 py-2 rounded-lg tracking-widest"></span>
+                     <button id="copyCodeBtn" class="btn bg-slate-600 p-2 rounded-lg hover:bg-slate-500" title="Copy to Clipboard">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-semibold text-gray-300 mb-4">Players</h3>
+            <div id="playerList" class="space-y-3 text-left">
+                <!-- Player items will be injected here by JavaScript -->
+            </div>
+
+            <button id="readyBtn" class="btn btn-ready w-full mt-8 py-3 px-6 rounded-lg text-lg">Ready Up</button>
+            <p id="allReadyMessage" class="hidden mt-4 text-green-400 font-semibold">All players are ready! Starting game...</p>
+        </div>
+        
+        <!-- Game View -->
+        <div id="gameView" class="hidden card p-8 text-center">
+            <h1 class="text-3xl font-bold text-teal-300">The Game Has Started!</h1>
+            <p class="mt-4 text-gray-300">This is where the GlobeQuest map and game controls will go.</p>
+            <!-- Game components like map, player stats, action buttons go here -->
+        </div>
+
+    </div>
+
+    <!-- Custom Message Box -->
+    <div id="messageBox" class="hidden fixed bottom-5 right-5 bg-red-500 text-white py-3 px-5 rounded-lg shadow-xl opacity-0 transform translate-y-2">
+        <p id="messageText"></p>
+    </div>
+
+<script type="module" src="/js/lobby.js"></script></body>
+</html>
+

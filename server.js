@@ -10,9 +10,9 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-const homeRoute = require('./routes/home');
+const lobbyRoute = require('./routes/lobby');
 
-app.use('/',homeRoute);
+app.use('/lobby',lobbyRoute);
 
 app.get('/',(req,res)=>{
     console.log("I am here");

@@ -1,0 +1,95 @@
+@keyframes pan-bg {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+@keyframes pulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+    50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+}
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+body {
+
+    font-family: 'Poppins', sans-serif;
+    color: #e5e7eb; /* text-gray-200 */
+    background-color: #1a202c;
+    background-image: url("../img/map.jpeg");
+    animation: pan-bg 80s linear infinite alternate;
+}
+.hidden { display: none; }
+
+.card {
+    background: rgba(30, 41, 59, 0.5); /* slate-800 with transparency */
+    border-radius: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease-in-out;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    border: none;
+    color: white;
+    font-weight: 600;
+}
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+}
+.btn:active {
+    transform: translateY(-1px) scale(0.98);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+.btn-create {
+    background-image: linear-gradient(to right, #2dd4bf, #34d399);
+}
+.btn-join {
+    background-image: linear-gradient(to right, #38bdf8, #60a5fa);
+}
+.btn-ready {
+     background-image: linear-gradient(to right, #4ade80, #22c55e);
+}
+ .btn-unready {
+     background-image: linear-gradient(to right, #facc15, #fbbf24);
+}
+
+.input-field {
+    background: rgba(15, 23, 42, 0.5); /* slate-900 with transparency */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+.input-field::placeholder { color: #94a3b8; } /* slate-400 */
+.input-field:focus {
+    box-shadow: none;
+    outline: none;
+    border-color: #2dd4bf; /* teal-400 */
+}
+
+.player-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background-color: rgba(255,255,255,0.1);
+}
+.player-avatar.ready {
+    animation: pulse 2s infinite;
+}
+.player-row {
+    animation: slideIn 0.5s ease-out forwards;
+}
+
+#messageBox { transition: opacity 0.5s, transform 0.5s; }
+
