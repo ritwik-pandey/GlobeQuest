@@ -179,6 +179,13 @@ async function startGameWithCountdown(roomCode) {
     }, 1000);
 }
 
+function playBackgroundMusic() {
+    const music = document.getElementById('background-music');
+    if (music && music.paused) {
+        music.volume = 0.3; // Set a pleasant volume
+        music.play().catch(error => console.log("User needs to interact with the page to play music."));
+    }
+}
 
 function listenToRoom(roomCode) {
     const roomRef = doc(db, 'rooms', roomCode);
@@ -203,6 +210,7 @@ function listenToRoom(roomCode) {
 // --- Event Handlers ---
 
 createRoomBtn.onclick = async () => {
+    playBackgroundMusic();
     if (!currentUser) return showMessage("Connecting... please wait a moment.");
     const nickname = nicknameInput.value.trim();
     if (!nickname) return showMessage("Please enter a nickname.");
@@ -225,6 +233,7 @@ createRoomBtn.onclick = async () => {
 };
 
 joinRoomBtn.onclick = async () => {
+    playBackgroundMusic();
     if (!currentUser) return showMessage("Connecting... please wait a moment.");
     const nickname = nicknameInput.value.trim();
     const roomCode = roomCodeInput.value.trim().toUpperCase();

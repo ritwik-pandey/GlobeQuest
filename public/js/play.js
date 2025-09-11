@@ -118,6 +118,14 @@ imageElement.addEventListener('click', (event) => {
 
 async function initPlay() {
   // get roomCode from URL or sessionStorage
+  const music = document.getElementById('background-music');
+  if (music) {
+    music.volume = 0.3;
+    music.play().catch(error => {
+      console.error("Music autoplay was blocked on the play page.", error);
+    });
+    
+  }
   let timerInterval = null;
   const urlParams = new URLSearchParams(window.location.search);
   const roomCode = urlParams.get('roomCode') || sessionStorage.getItem('roomCode');

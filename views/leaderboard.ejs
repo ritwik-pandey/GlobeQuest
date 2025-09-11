@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
+    <audio id="background-music" src="/audio/your-music-file.mp3" loop></audio>
     <div class="container">
         <h1 class="game-over-title">GAME OVER</h1>
         
@@ -45,5 +46,16 @@
             <% } %>
         </div>
     </div>
+    <script>
+        window.addEventListener('load', () => {
+            const music = document.getElementById('background-music');
+            if (music) {
+                music.volume = 0.3;
+                music.play().catch(error => {
+                    console.error("Music autoplay was blocked on the leaderboard page.", error);
+                });
+            }
+        });
+    </script>
 </body>
 </html>
