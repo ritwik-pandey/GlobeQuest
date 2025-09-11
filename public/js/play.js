@@ -87,28 +87,55 @@ async function initPlay() {
         }
       }
     }
+    const gotoBtn = document.querySelector('.goto');
+
     const cityElement = document.getElementById('current-city');
     if (cityElement && rd.players && auth.currentUser) {
       const currentUser = rd.players.find(player => player.userId === auth.currentUser.uid);
       if (currentUser && currentUser.currentCity) {
         cityElement.textContent = `Current City: ${currentUser.currentCity}`;
+        if (gotoBtn) {
+          gotoBtn.style.display = "none";
+        }
       }
     }
     const currentUser = rd.players.find(player => player.userId === auth.currentUser.uid);
     const markers = document.querySelectorAll('.marker');
     const cityImage = document.querySelector(".city-photo-img");
     markers.forEach(marker => {
-      marker.onclick = () => {
+      marker.onclick = async () => {
         if (currentUser.currentCity && marker.id !== currentUser.currentCity) {
             nextDestination = marker.id; // ✅ save clicked city
             cityElement.textContent = `Next Destination = ${marker.id}`;
-            cityImage.src = `/img/${marker.id}.png`;
-            
+            cityImage.src = `/img/${marker.id}.png`;   
+        }else if(currentUser.currentCity && marker.id === currentUser.currentCity){
+            cityElement.textContent = `Current Destination = ${marker.id}`;
+            cityImage.src = `/img/${marker.id}.png`;  
+        }
+        const cityDocRef = doc(db, "citiesGraph", currentUser.currentCity);
+        const citySnap = await getDoc(cityDocRef);
+        if (!citySnap.exists()) return;
+
+        const cityData = citySnap.data();
+        const cost = cityData[nextDestination];
+
+        if (cost === undefined) {
+          // no direct path → hide button
+          gotoBtn.style.display = "none";
+          console.log(`⚠️ No path from ${currentUser.currentCity} → ${nextDestination}`);
+          return;
+        }
+
+        if (currentUser.gold < cost) {
+          // not enough gold → hide button
+          gotoBtn.style.display = "none";
+        } else {
+          // enough gold → show button
+          gotoBtn.style.display = "inline-block";
         }
       };
     });
 
-    const gotoBtn = document.querySelector('.goto');
 if (gotoBtn) {
   gotoBtn.addEventListener('click', async () => {
     
@@ -117,11 +144,39 @@ if (gotoBtn) {
       const snap = await getDoc(roomRef);
       if (!snap.exists()) return;
 
+      
+
       const roomData = snap.data();
       const players = roomData.players || [];
 
       // find current user
       const idx = players.findIndex(p => p.userId === auth.currentUser.uid);
+      const currentUser = players[idx];
+      const fromCity = currentUser.currentCity;
+
+      // get the document of the current city
+      const cityDocRef = doc(db, "citiesGraph", fromCity);
+      const citySnap = await getDoc(cityDocRef);
+      if (!citySnap.exists()) {
+        console.log("⚠️ City not found in graph:", fromCity);
+        return;
+      }
+      const cityData = citySnap.data();
+      const cost = cityData[nextDestination]; 
+      
+        if (currentUser.gold < cost) {
+          console.log(`⚠️ Not enough gold! Need ${cost}, but you have ${currentUser.gold}`);
+          return;
+        }
+
+
+      // e.g. 300
+
+      if (cost === undefined) {
+        console.log(`⚠️ No direct path from ${fromCity} → ${nextDestination}`);
+        return;
+      }
+      
       if (idx !== -1) {
         // ensure citiesVisited exists
         players[idx].citiesVisited = players[idx].citiesVisited || [];
@@ -129,6 +184,8 @@ if (gotoBtn) {
         players[idx].citiesVisited.push(nextDestination);
 
         players[idx].currentCity = nextDestination;
+
+        players[idx].gold -= cost;
 
         // write back updated players array
         await updateDoc(roomRef, {
