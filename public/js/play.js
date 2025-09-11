@@ -96,11 +96,14 @@ async function initPlay() {
     }
     const currentUser = rd.players.find(player => player.userId === auth.currentUser.uid);
     const markers = document.querySelectorAll('.marker');
+    const cityImage = document.querySelector(".city-photo-img");
     markers.forEach(marker => {
       marker.onclick = () => {
         if (currentUser.currentCity && marker.id !== currentUser.currentCity) {
             nextDestination = marker.id; // ✅ save clicked city
             cityElement.textContent = `Next Destination = ${marker.id}`;
+            cityImage.src = `/img/${marker.id}.png`;
+            
         }
       };
     });
@@ -125,10 +128,18 @@ if (gotoBtn) {
         // push nextDestination
         players[idx].citiesVisited.push(nextDestination);
 
+        players[idx].currentCity = nextDestination;
+
         // write back updated players array
         await updateDoc(roomRef, {
           players: players
         });
+
+        // also update the UI immediately (optional, snapshot will also update it)
+      const cityElement = document.getElementById('current-city');
+      if (cityElement) {
+        cityElement.textContent = `Current City: ${nextDestination}`;
+      }
 
         console.log("Updated Firestore with new destination!");
       }
