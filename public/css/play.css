@@ -251,6 +251,28 @@ body, html {
   color: white;
 }
 
+/* Ship Work  */
+
+.gotoship{
+  position: absolute;    /* take out of normal flow */
+  margin-left: 70%;
+  margin-top: -7%;  
+  background-color: rgb(241, 205, 23);
+  padding: 10px;
+  border-radius: 10px;
+  font-weight: 500;
+  
+}
+
+.ship-cost {
+  position: absolute;
+  margin-left: 70%;
+  margin-top: -2%;         /* place just below button */
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+}
+
 /* Places visited */
 
 .places-visited{

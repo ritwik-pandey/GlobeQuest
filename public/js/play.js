@@ -39,6 +39,8 @@ const imageElement = document.getElementById('clickableImage');
 const outputElement = document.getElementById('coordinatesOutput');
 const imageContainer = document.querySelector('.image-container');
 const flightCostElement = document.getElementById("flight-cost");
+const ShipCostElement = document.getElementById("ship-cost");
+
 
 let nextDestination = null;
 
@@ -116,7 +118,6 @@ async function initPlay() {
   if (!roomCode) return goToLobby();
 
     const quizButton = document.getElementById('quiz-button');
-    displayLoad();
     if (quizButton) {
       // Find your quizButton event listener inside the initPlay() function
 
@@ -197,6 +198,10 @@ async function initPlay() {
     }
     const gotoBtn = document.querySelector('.goto');
     const flightCost = document.querySelector('.flight-cost');
+    const shipCost = document.querySelector('.ship-cost');
+    const gotoshipBtn = document.querySelector('.gotoship');
+
+
 
     const cityElement = document.getElementById('current-city');
     if (cityElement && rd.players && auth.currentUser) {
@@ -204,8 +209,11 @@ async function initPlay() {
       if (currentUser && currentUser.currentCity) {
         cityElement.textContent = `Current City: ${currentUser.currentCity}`;
         if (gotoBtn) {
+          shipCost.style.display = "none";
           flightCost.style.display = "none";
           gotoBtn.style.display = "none";
+          gotoshipBtn.style.display = "none";
+
         }
       }
     }
@@ -234,13 +242,17 @@ async function initPlay() {
 
         const cityData = citySnap.data();
         const cost = cityData[nextDestination];
-        flightCostElement.textContent = `Cost: ${cost}`;
+        flightCostElement.textContent = `Cost: ${cost*200}`;
+        ShipCostElement.textContent = `Cost: ${cost*100}`;
         
 
         if (cost === undefined) {
           // no direct path → hide button
           gotoBtn.style.display = "none";
+          gotoshipBtn.style.display = "none";
+
           flightCost.style.display = "none"
+          shipCost.style.display = "none"
           console.log(`⚠️ No path from ${currentUser.currentCity} → ${nextDestination}`);
           return;
         }
@@ -248,12 +260,17 @@ async function initPlay() {
         if (currentUser.gold < cost) {
           // not enough gold → hide button
           gotoBtn.style.display = "none";
+          gotoshipBtn.style.display = "none";
           flightCost.style.display = "inline-block";
+          shipCost.style.display = "inline-block";
 
         } else {
           // enough gold → show button
           flightCost.style.display = "inline-block";
           gotoBtn.style.display = "inline-block";
+          shipCost.style.display = "inline-block";
+          gotoshipBtn.style.display = "inline-block";
+
         }
 
       }
@@ -271,7 +288,8 @@ async function initPlay() {
       }
     }
     });
-  
+
+    //Flight Button
 
 if (gotoBtn) {
   gotoBtn.addEventListener('click', async () => {
@@ -299,7 +317,7 @@ if (gotoBtn) {
         return;
       }
       const cityData = citySnap.data();
-      const cost = cityData[nextDestination]; 
+      const cost = cityData[nextDestination]*200; 
       
         if (currentUser.gold < cost) {
           console.log(`⚠️ Not enough gold! Need ${cost}, but you have ${currentUser.gold}`);
@@ -342,7 +360,80 @@ if (gotoBtn) {
       console.log("No destination selected yet!");
     }
   });
-}
+
+  //SHIP Button
+
+  } 
+    if(gotoshipBtn){
+      gotoshipBtn.addEventListener('click', async () => {
+        
+        if (nextDestination) {
+          console.log(`User wants to go to: ${nextDestination}`);
+          const snap = await getDoc(roomRef);
+          if (!snap.exists()) return;
+
+          
+
+          const roomData = snap.data();
+          const players = roomData.players || [];
+
+          // find current user
+          const idx = players.findIndex(p => p.userId === auth.currentUser.uid);
+          const currentUser = players[idx];
+          const fromCity = currentUser.currentCity;
+
+          // get the document of the current city
+          const cityDocRef = doc(db, "citiesGraph", fromCity);
+          const citySnap = await getDoc(cityDocRef);
+          if (!citySnap.exists()) {
+            console.log("⚠️ City not found in graph:", fromCity);
+            return;
+          }
+          const cityData = citySnap.data();
+          const cost = cityData[nextDestination]*100; 
+          
+            if (currentUser.gold < cost) {
+              console.log(`⚠️ Not enough gold! Need ${cost}, but you have ${currentUser.gold}`);
+              return;
+            }
+
+
+          // e.g. 300
+
+          if (cost === undefined) {
+            console.log(`⚠️ No direct path from ${fromCity} → ${nextDestination}`);
+            return;
+          }
+          
+          if (idx !== -1) {
+            // ensure citiesVisited exists
+            players[idx].citiesVisited = players[idx].citiesVisited || [];
+            // push nextDestination
+            players[idx].citiesVisited.push(nextDestination);
+
+            players[idx].currentCity = nextDestination;
+
+            players[idx].gold -= cost;
+
+            // write back updated players array
+            await updateDoc(roomRef, {
+              players: players
+            });
+
+            // also update the UI immediately (optional, snapshot will also update it)
+          const cityElement = document.getElementById('current-city');
+          if (cityElement) {
+            cityElement.textContent = `Current City: ${nextDestination}`;
+          }
+
+            console.log("Updated Firestore with new destination!");
+          }
+
+        } else {
+          console.log("No destination selected yet!");
+        }
+      });
+    }
   });
 }
 
