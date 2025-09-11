@@ -73,6 +73,8 @@ body, html {
     left:35%;  
 }
 
+
+
 .leaderboard h2 {
   margin-bottom: 15px;
   font-size: 20px;
@@ -88,10 +90,11 @@ body, html {
 .leaderboard li {
   display: flex;
   justify-content: space-between;
-  background: #2a2a40;
+  background: #f3c482;
   margin: 5px 0;
   padding: 8px 12px;
   border-radius: 6px;
+  
 }
 
 .leaderboard li span {
@@ -102,15 +105,19 @@ body, html {
   flex: 1;              /* takes equal share */
   max-width: 15%; 
   max-height: 50%;
-  background: #242130;
+  padding: 25px;
+  background-size: 220%;        /* ✅ make the image cover the entire box */
+  background-repeat: no-repeat;  /* ✅ prevent tiling */
+  background-position: center;
+  background-image: url('../img/frame.png');
   color: white;
-  padding: 20px;
-  margin-top: 30px;
-  margin-left: 30px;
+  
+  margin-top: 6%;
+  margin-left: 0;
   box-shadow: 2px 0 8px rgba(0,0,0,0.3);
   overflow-y: auto;
-  opacity: 0.8;
-  border-radius: 10px;
+  opacity: 1;
+  border-radius: 20px;
   z-index: 10;
 }
 
@@ -194,7 +201,31 @@ body, html {
 }
 
 .goto{
-  margin-left: 65%;
-  margin-bottom: 10%;
+  position: absolute;    /* take out of normal flow */
+  margin-left: 58%;
+  margin-top: -7%;  
+  background-color: rgb(241, 205, 23);
+  padding: 10px;
+  border-radius: 10px;
+  font-weight: 500;
+  
 }
 
+.flight-cost {
+  position: absolute;
+  margin-left: 58%;
+  margin-top: -2%;         /* place just below button */
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+}
+
+/* Places visited */
+
+.places-visited{
+  margin-left: 314px;
+  margin-top: -32px;
+   color: rgb(223, 152, 152);
+  font-weight: bold;
+  font-size: 20px;
+}

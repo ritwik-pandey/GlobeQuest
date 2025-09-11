@@ -31,6 +31,7 @@ function goToLobby() { window.location.href = "/lobby"; }
 const imageElement = document.getElementById('clickableImage');
 const outputElement = document.getElementById('coordinatesOutput');
 const imageContainer = document.querySelector('.image-container');
+const flightCostElement = document.getElementById("flight-cost");
 
 let nextDestination = null;
 
@@ -133,6 +134,7 @@ async function initPlay() {
       }
     }
     const gotoBtn = document.querySelector('.goto');
+    const flightCost = document.querySelector('.flight-cost');
 
     const cityElement = document.getElementById('current-city');
     if (cityElement && rd.players && auth.currentUser) {
@@ -140,6 +142,7 @@ async function initPlay() {
       if (currentUser && currentUser.currentCity) {
         cityElement.textContent = `Current City: ${currentUser.currentCity}`;
         if (gotoBtn) {
+          flightCost.style.display = "none";
           gotoBtn.style.display = "none";
         }
       }
@@ -149,24 +152,33 @@ async function initPlay() {
     const cityImage = document.querySelector(".city-photo-img");
     markers.forEach(marker => {
       marker.onclick = async () => {
+        if (currentUser.citiesVisited && currentUser.citiesVisited.includes(marker.id) && marker.id !== currentUser.currentCity) {
+          cityElement.textContent = `${marker.id} (Already Visited)`;
+          cityImage.src = `/img/${marker.id}.png`;
+          return;
+        }
         if (currentUser.currentCity && marker.id !== currentUser.currentCity) {
             nextDestination = marker.id; // ✅ save clicked city
-            cityElement.textContent = `Next Destination = ${marker.id}`;
+            cityElement.textContent = `Next Destination: ${marker.id}`;
             cityImage.src = `/img/${marker.id}.png`;   
         }else if(currentUser.currentCity && marker.id === currentUser.currentCity){
-            cityElement.textContent = `Current Destination = ${marker.id}`;
+            cityElement.textContent = `Current Location: ${marker.id}`;
             cityImage.src = `/img/${marker.id}.png`;  
         }
+    
         const cityDocRef = doc(db, "citiesGraph", currentUser.currentCity);
         const citySnap = await getDoc(cityDocRef);
         if (!citySnap.exists()) return;
 
         const cityData = citySnap.data();
         const cost = cityData[nextDestination];
+        flightCostElement.textContent = `Cost: ${cost}`;
+        
 
         if (cost === undefined) {
           // no direct path → hide button
           gotoBtn.style.display = "none";
+          flightCost.style.display = "none"
           console.log(`⚠️ No path from ${currentUser.currentCity} → ${nextDestination}`);
           return;
         }
@@ -174,12 +186,30 @@ async function initPlay() {
         if (currentUser.gold < cost) {
           // not enough gold → hide button
           gotoBtn.style.display = "none";
+          flightCost.style.display = "inline-block";
+
         } else {
           // enough gold → show button
+          flightCost.style.display = "inline-block";
           gotoBtn.style.display = "inline-block";
         }
-      };
+
+      }
+
+       const placesElement = document.querySelector(".places-visited");
+    if (placesElement) {
+      const visitedCount = currentUser.citiesVisited
+        ? currentUser.citiesVisited.length
+        : 0;
+
+      // If nextDestination is already visited, keep count same
+      if (currentUser.citiesVisited?.includes(nextDestination)) {
+     
+        placesElement.textContent = `Places visited: ${visitedCount}`;
+      }
+    }
     });
+  
 
 if (gotoBtn) {
   gotoBtn.addEventListener('click', async () => {
@@ -261,6 +291,8 @@ onAuthStateChanged(auth, (user) => {
   initPlay();
 });
 
+//Leaderboard
+
 const leaderboardList = document.getElementById("leaderboard-list");
 
 function renderLeaderboard(players) {
@@ -270,16 +302,14 @@ function renderLeaderboard(players) {
   leaderboardList.innerHTML = "";
   players.forEach((p, index) => {
     const li = document.createElement("li");
+    const isCurrentUser = auth.currentUser && p.userId === auth.currentUser.uid;
     li.innerHTML = `
-      <span>${index + 1}. ${p.nickname}</span>
-      <span>${p.points || 0}</span>
+      <span style="color: grey;">${index + 1}.</span>
+      <span style="color: ${isCurrentUser ? 'green' : 'black'};"> ${p.nickname}</span>
+      <span> ${p.points || 0}</span>
     `;
     leaderboardList.appendChild(li);
   });
 }
-
-//Destination
- // keep track of clicked city
-
 
 
