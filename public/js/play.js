@@ -17,6 +17,15 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// This object translates city names into the CSS coordinates from your stylesheet.
+const cityCoordinates = {
+    "Delhi": { top: '40%', right: '20%' },
+    "San-Francisco": { top: '30%', left: '20%' },
+    "Paris": { top: '25%', right: '41%' },
+    "Cape-town": { top: '71%', right: '37%' },
+    "Toronto": { top: '26%', left: '35%' }
+};
+
 function goToLobby() { window.location.href = "/lobby"; }
 
 const imageElement = document.getElementById('clickableImage');
@@ -24,6 +33,41 @@ const outputElement = document.getElementById('coordinatesOutput');
 const imageContainer = document.querySelector('.image-container');
 
 let nextDestination = null;
+
+// --- NEW: Function to render player icons --- gaurav_1
+function renderPlayerIcons(players) {
+    if (!imageContainer) return;
+
+    // First, remove all previously rendered player icons to prevent duplicates
+    const existingIcons = document.querySelectorAll('.player-icon');
+    existingIcons.forEach(icon => icon.remove());
+
+    // Loop through each player and draw their icon on the map
+    players.forEach(player => {
+        if (player.currentCity && cityCoordinates[player.currentCity]) {
+            const coords = cityCoordinates[player.currentCity];
+
+            // Create the icon element
+            const iconElement = document.createElement('img');
+            iconElement.src = '/img/player-icon.png'; // Make sure you have this image!
+            iconElement.className = 'player-icon';
+            iconElement.title = player.nickname; // Shows player name on hover
+
+            // Apply coordinates from our object
+            iconElement.style.top = coords.top;
+            if (coords.left) {
+                iconElement.style.left = coords.left;
+            }
+            if (coords.right) {
+                iconElement.style.right = coords.right;
+            }
+
+            // Add the icon to the map container
+            imageContainer.appendChild(iconElement);
+        }
+    });
+}
+// -----------------------------------------gaurav_1
 
 // Add a click event listener to the image
 imageElement.addEventListener('click', (event) => {
@@ -78,6 +122,7 @@ async function initPlay() {
     const rd = ds.data();
     if (rd.gameState !== 'in-game') return goToLobby();
     renderLeaderboard(rd.players || []);
+    renderPlayerIcons(rd.players); // --- MODIFIED: Call the new function here ---
     if (auth.currentUser && rd.players) {
       const currentUser = rd.players.find(player => player.userId === auth.currentUser.uid);
       if (currentUser && currentUser.gold !== undefined) {

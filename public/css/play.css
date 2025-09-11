@@ -12,6 +12,16 @@ body, html {
   position: relative;
 }
 
+.image-container .player-icon {
+  position: absolute;
+  width: 40px;   /* Smaller size */
+  height: 40px;  /* Smaller size */
+  z-index: 6;    
+  pointer-events: none; 
+  transform: translate(-50%, -50%); 
+  transition: top 0.7s ease, left 0.7s ease, right 0.7s ease;
+}
+
 .image-container {
   position: fixed;  /* Fix position to cover viewport */
   top: 0;
@@ -187,3 +197,4 @@ body, html {
   margin-left: 65%;
   margin-bottom: 10%;
 }
+
