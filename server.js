@@ -7,6 +7,8 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+//<!--CHANGE -------------------------------------------- 6-->
+import leaderboardRoute from './routes/leaderboard.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyDcoLHRVLcuAu02hz4YXkriRLuJwZv_imc",
@@ -41,6 +43,8 @@ app.use(express.json());
 // --- Use the imported routes ---
 app.use('/lobby', lobbyRoute);
 app.use('/play', playRoute);
+//<!--CHANGE -------------------------------------------- 6-->
+app.use('/leaderboard', leaderboardRoute);
 
 app.get('/', (req, res) => {
   console.log("I am here");

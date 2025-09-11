@@ -1,0 +1,119 @@
+/* public/css/leaderboard.css */
+
+body {
+    font-family: 'Press Start 2P', cursive;
+    background-color: #1a1a2e; /* Dark blue background */
+    color: #ffffff;
+    text-align: center;
+    padding: 20px;
+    image-rendering: pixelated; /* Sharp pixels for a retro feel */
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    border: 4px solid #000;
+    box-shadow: 6px 6px 0px #e43f5a; /* Retro 3D effect */
+    background: #162447; /* Slightly lighter blue */
+    padding: 20px 40px;
+}
+
+.game-over-title {
+    font-size: 3.5em;
+    color: #f8b400; /* Bright yellow */
+    text-shadow: 4px 4px 0px #e43f5a; /* Pink shadow */
+    margin-bottom: 40px;
+    animation: flicker 1.5s infinite alternate;
+}
+
+@keyframes flicker {
+    0%, 18%, 22%, 25%, 53%, 57%, 100% {
+        text-shadow:
+            4px 4px 0px #e43f5a,
+            0 0 5px #fff,
+            0 0 10px #fff,
+            0 0 20px #f8b400,
+            0 0 30px #f8b400,
+            0 0 40px #f8b400;
+    }
+    20%, 24%, 55% {       
+        text-shadow: none;
+    }
+}
+
+.section-title {
+    color: #00c9c8; /* Bright cyan */
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+}
+
+.podium-container, .others-container {
+    margin-bottom: 40px;
+}
+
+.player-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr 1fr;
+    align-items: center;
+    text-align: left;
+    padding: 15px;
+    margin: 10px 0;
+    background: #1f4068;
+    border: 2px solid #000;
+    box-shadow: 4px 4px 0px #000;
+    font-size: 1em;
+}
+
+.rank {
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+    color: #f8b400;
+}
+
+.player-name {
+    color: #fff;
+}
+
+.player-stat {
+    color: #00c9c8;
+    font-weight: normal;
+}
+
+/* --- Special Podium Styles --- */
+.winner.rank-1 {
+    background: #f8b400; /* Gold */
+    color: #162447;
+    border-color: #fff;
+    box-shadow: 4px 4px 0px #fff;
+}
+.winner.rank-1 .rank, .winner.rank-1 .player-name, .winner.rank-1 .player-stat {
+    color: #162447;
+}
+
+.winner.rank-2 {
+    background: #c0c0c0; /* Silver */
+    color: #162447;
+}
+.winner.rank-2 .rank, .winner.rank-2 .player-name, .winner.rank-2 .player-stat {
+    color: #162447;
+}
+
+
+.winner.rank-3 {
+    background: #cd7f32; /* Bronze */
+    color: #fff;
+}
+.winner.rank-3 .rank, .winner.rank-3 .player-name, .winner.rank-3 .player-stat {
+    color: #fff;
+}
+
+.no-winner-text, .info-text {
+    color: #e43f5a;
+    font-size: 1.2em;
+    margin-top: 20px;
+    padding: 15px;
+    background: #1f4068;
+    border: 2px solid #000;
+}

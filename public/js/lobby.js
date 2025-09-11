@@ -208,7 +208,7 @@ createRoomBtn.onclick = async () => {
     try {
         await setDoc(roomRef, {
             roomCode: roomCode, hostId: currentUser.uid, gameState: "lobby",
-            players: [newPlayer], createdAt: new Date()
+            players: [newPlayer], createdAt: new Date(), gameEndTime: Date.now() + 120 * 1000,
         });
         switchToLobbyView(roomCode);
         listenToRoom(roomCode);

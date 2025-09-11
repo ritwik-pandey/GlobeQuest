@@ -116,6 +116,7 @@ imageElement.addEventListener('click', (event) => {
 
 async function initPlay() {
   // get roomCode from URL or sessionStorage
+  let timerInterval = null;
   const urlParams = new URLSearchParams(window.location.search);
   const roomCode = urlParams.get('roomCode') || sessionStorage.getItem('roomCode');
   if (!roomCode) return goToLobby();
@@ -186,7 +187,26 @@ async function initPlay() {
   // Optionally listen for updates (optional)
   onSnapshot(roomRef, ds => {
     if (!ds.exists()) return goToLobby();
-    const rd = ds.data();
+        const rd = ds.data();
+        if (roomData.gameEndTime && !timerInterval) {
+        const timerElement = document.getElementById('game-timer');
+
+        timerInterval = setInterval(() => {
+            const remaining = roomData.gameEndTime - Date.now();
+
+            if (remaining <= 0) {
+                clearInterval(timerInterval);
+                timerElement.textContent = "Time's Up!";
+                // Redirect to the leaderboard page
+                window.location.href = `/leaderboard?roomCode=${roomCode}`;
+            } else {
+                const minutes = Math.floor((remaining / 1000) / 60);
+                const seconds = Math.floor((remaining / 1000) % 60);
+                timerElement.textContent = `Time: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+        }, 1000);
+    }
+    if (!ds.exists()) return goToLobby();
     if (rd.gameState !== 'in-game') return goToLobby();
     renderLeaderboard(rd.players || []);
     renderPlayerIcons(rd.players); // --- MODIFIED: Call the new function here ---
@@ -467,7 +487,10 @@ function renderLeaderboard(players) {
     li.innerHTML = `
       <span style="color: grey;">${index + 1}.</span>
       <span style="color: ${isCurrentUser ? 'green' : 'black'};"> ${p.nickname}</span>
-      <span> ${p.points || 0}</span>
+      <br>
+      <span>${p.timeTaken || 0} hr</span>
+      <br>
+      <span> ${p.gold || 0} 🪙</span>
     `;
     leaderboardList.appendChild(li);
   });
