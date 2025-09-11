@@ -1,9 +1,10 @@
-const express = require("express");
+import express from "express"; // <-- CHANGE THIS LINE
 const router = express.Router();
 
-// GET /lobby → render EJS
 router.get("/", (req, res) => {
-    res.render("lobby"); 
+  res.render("lobby");
 });
 
-module.exports = router;
+
+// At the end of the file
+export default router;

@@ -3,6 +3,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebas
 import { getFirestore, doc, getDoc, onSnapshot,updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
+// --- NEW QUIZ MODAL ELEMENTS ---
+const quizModal = document.getElementById('quiz-modal');
+const quizQuestionEl = document.getElementById('quiz-question');
+const quizOptionsEl = document.getElementById('quiz-options');
+const quizFeedbackEl = document.getElementById('quiz-feedback');
+// ------------------------------
+
 const firebaseConfig = {
   apiKey: "AIzaSyDcoLHRVLcuAu02hz4YXkriRLuJwZv_imc",
   authDomain: "globequest-4616a.firebaseapp.com",
@@ -107,6 +114,61 @@ async function initPlay() {
   const urlParams = new URLSearchParams(window.location.search);
   const roomCode = urlParams.get('roomCode') || sessionStorage.getItem('roomCode');
   if (!roomCode) return goToLobby();
+
+    const quizButton = document.getElementById('quiz-button');
+    displayLoad();
+    if (quizButton) {
+      // Find your quizButton event listener inside the initPlay() function
+
+    quizButton.addEventListener('click', async () => {
+      console.log('Fetching quiz question from the server...');
+      
+      // --- Get the required data ---
+      const roomCode = sessionStorage.getItem('roomCode');
+      const userId = auth.currentUser ? auth.currentUser.uid : null;
+      
+      // To get the current city, we need to get the latest room data
+      const db = getFirestore();
+      const roomRef = doc(db, 'rooms', roomCode);
+      const roomSnap = await getDoc(roomRef);
+      
+      if (!roomSnap.exists() || !userId) {
+          alert("Could not find your game data. Please refresh.");
+          return;
+      }
+      
+      const roomData = roomSnap.data();
+      const currentUser = roomData.players.find(p => p.userId === userId);
+      const city = currentUser ? currentUser.currentCity : null;
+
+      if (!city) {
+          return;
+      }
+      // -------------------------
+
+      try {
+        quizButton.disabled = true;
+
+        // --- Construct the new URL with query parameters ---
+        const response = await fetch(`/generate-quiz?roomCode=${roomCode}&userId=${userId}&city=${city}`);
+        
+        const data = await response.json();
+
+        if (!response.ok) {
+          // This will now handle our "limit reached" message
+          throw new Error(data.error || `Server error: ${response.status}`);
+        }
+        
+        displayQuiz(data);
+
+      } catch (error) {
+        console.error("Failed to fetch quiz:", error);
+        // Display the specific error message from the server (e.g., limit reached)
+        alert(error.message); 
+        quizButton.disabled = false;
+      }
+    });
+    }
 
   const roomRef = doc(db, 'rooms', roomCode);
   const snap = await getDoc(roomRef);
@@ -312,4 +374,45 @@ function renderLeaderboard(players) {
   });
 }
 
+//QUIZ
+
+function displayQuiz(quizData) {
+  // Clear previous options and feedback
+  quizOptionsEl.innerHTML = '';
+  quizFeedbackEl.textContent = '';
+
+  // Set the question text
+  quizQuestionEl.textContent = quizData.question;
+
+  // Create a button for each option
+  quizData.options.forEach(option => {
+    const button = document.createElement('button');
+    button.textContent = option;
+    button.className = 'option-btn';
+    
+    button.addEventListener('click', () => {
+      // Check if the clicked answer is correct
+      if (option === quizData.correctAnswer) {
+        quizFeedbackEl.textContent = 'Correct!';
+        quizFeedbackEl.style.color = '#4CAF50'; // Green
+        // TODO: Add points or gold to the player
+      } else {
+        quizFeedbackEl.textContent = `Wrong! The correct answer was: ${quizData.correctAnswer}`;
+        quizFeedbackEl.style.color = '#F44336'; // Red
+      }
+      
+      // After a short delay, hide the modal
+      setTimeout(() => {
+        quizModal.style.display = 'none';
+        // Re-enable the main quiz button for the next round
+        document.getElementById('quiz-button').disabled = false; 
+      }, 2500); // 2.5-second delay
+    });
+    
+    quizOptionsEl.appendChild(button);
+  });
+
+  // Show the modal
+  quizModal.style.display = 'flex';
+}
 

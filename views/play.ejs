@@ -38,6 +38,11 @@
             <div class="city-photo">
                 <img class="city-photo-img" src="/img/San-Francisco.png" alt="City Photo">
             </div>
+            <button id="quiz-button" aria-label="Start Quiz">
+                <video autoplay loop muted playsinline class="quiz-button-background">
+                    <source src="/img/quiz-video.mp4" type="video/mp4">
+                </video>
+                </button>
             <br><br><br>
             <div id="current-city" class="cityy">Current City: Loading...</div>
             <button class="goto" type="button">Take Flight</button>
@@ -57,5 +62,13 @@
 <body>
   <div id="playersContainer"></div>
   <script type="module" src="/js/play.js"></script>
+  <div id="quiz-modal" class="modal-overlay" style="display: none;">
+  <div class="modal-content">
+    <h2 id="quiz-question">Question will load here...</h2>
+    <div id="quiz-options" class="options-container">
+      </div>
+    <p id="quiz-feedback"></p>
+  </div>
+</div>
 </body>
 </html>
