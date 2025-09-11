@@ -76,6 +76,31 @@ async function initPlay() {
     const rd = ds.data();
     if (rd.gameState !== 'in-game') return goToLobby();
     renderLeaderboard(rd.players || []);
+    if (auth.currentUser && rd.players) {
+      const currentUser = rd.players.find(player => player.userId === auth.currentUser.uid);
+      if (currentUser && currentUser.gold !== undefined) {
+        const goldElement = document.getElementById('user-gold');
+        if (goldElement) {
+          goldElement.textContent = `Gold: ${currentUser.gold}`;
+        }
+      }
+    }
+    const cityElement = document.getElementById('current-city');
+    if (cityElement && rd.players && auth.currentUser) {
+      const currentUser = rd.players.find(player => player.userId === auth.currentUser.uid);
+      if (currentUser && currentUser.currentCity) {
+        cityElement.textContent = `Current City: ${currentUser.currentCity}`;
+      }
+    }
+    const currentUser = rd.players.find(player => player.userId === auth.currentUser.uid);
+    const markers = document.querySelectorAll('.marker');
+    markers.forEach(marker => {
+      marker.onclick = () => {
+        if (currentUser.currentCity && marker.id !== currentUser.currentCity) {
+            cityElement.textContent = `Next Destination = ${marker.id}`;
+        }
+      };
+    });
   });
 }
 
@@ -102,4 +127,3 @@ function renderLeaderboard(players) {
     leaderboardList.appendChild(li);
   });
 }
-

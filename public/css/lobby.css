@@ -17,7 +17,7 @@ body {
     color: #e5e7eb; /* text-gray-200 */
     background-color: #1a202c;
     background-image: url("../img/map.jpeg");
-    animation: pan-bg 80s linear infinite alternate;
+    animation: pan-bg 800s linear infinite alternate;
 }
 .hidden { display: none; }
 

@@ -203,7 +203,8 @@ createRoomBtn.onclick = async () => {
 
     const roomCode = generateRoomCode();
     const roomRef = doc(db, 'rooms', roomCode);
-    const newPlayer = { userId: currentUser.uid, nickname: nickname, isReady: false };
+    //HOST GOLD
+    const newPlayer = { userId: currentUser.uid, nickname: nickname, isReady: false, gold: 5000, currentCity: "San Francisco", citiesVisited: []};
     try {
         await setDoc(roomRef, {
             roomCode: roomCode, hostId: currentUser.uid, gameState: "lobby",
@@ -235,7 +236,8 @@ joinRoomBtn.onclick = async () => {
              switchToLobbyView(roomCode);
              return listenToRoom(roomCode);
         }
-        const newPlayer = { userId: currentUser.uid, nickname: nickname, isReady: false };
+        //USER GOLD
+        const newPlayer = { userId: currentUser.uid, nickname: nickname, isReady: false, gold: 5000,currentCity: "San Francisco", citiesVisited: []};
         await updateDoc(roomRef, { players: arrayUnion(newPlayer) });
         switchToLobbyView(roomCode);
         listenToRoom(roomCode);
