@@ -47,13 +47,11 @@ app.get('/', (req, res) => {
   res.redirect('/lobby'); // It's good practice to send a response
 });
 
-// --- Your Gemini Quiz Route ---
 app.get('/generate-quiz', async (req, res) => {
   const { roomCode, userId, city } = req.query;
-  const QUIZ_LIMIT = 5;
 
   if (!roomCode || !userId || !city) {
-    return res.status(400).json({ error: "Missing required information: roomCode, userId, and city." });
+    return res.status(400).json({ error: "Missing required information." });
   }
 
   try {
@@ -72,45 +70,55 @@ app.get('/generate-quiz', async (req, res) => {
       return res.status(404).json({ error: "Player not found in this room." });
     }
 
-    // Check the player's quiz count for the current city
     const player = roomData.players[playerIndex];
-    const quizCount = player.quizCounts?.[city] || 0;
+    const hasTakenQuiz = player.quizzesTaken?.[city] || false;
 
-    if (quizCount >= QUIZ_LIMIT) {
-      return res.status(403).json({ error: `You have already answered all ${QUIZ_LIMIT} questions for ${city}.` });
+    if (hasTakenQuiz) {
+      return res.status(403).json({ error: `You have already taken the quiz for ${city}.` });
     }
 
-    // --- If the player can take the quiz, proceed to call Gemini ---
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return res.status(500).json({ error: "API key is not configured on the server." });
+      return res.status(500).json({ error: "API key is not configured." });
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
+    
     const prompt = `
-      Generate 1 very easy multiple-choice cultural quiz question about ${city}.
-      Your entire response MUST be a valid JSON object with keys: "question", "options" (an array of 4 strings), and "correctAnswer".
-      Do not include any text or markdown formatting.
+      Generate 5 very easy multiple-choice cultural quiz questions about ${city}.
+      Your entire response MUST be a valid JSON array of objects. Do not include any text or markdown.
+      Each object must have keys: "question", "options" (an array of 4 strings), and "correctAnswer".
     `;
 
     const result = await model.generateContent(prompt);
-    const response = result.response;
-    const jsonText = response.text();
-    const quizData = JSON.parse(jsonText);
+    const jsonText = result.response.text();
 
-    // --- IMPORTANT: Update the quiz count in Firestore ---
+    const startIndex = jsonText.indexOf('[');
+    const endIndex = jsonText.lastIndexOf(']');
+    const jsonString = jsonText.substring(startIndex, endIndex + 1);
+    
+    const quizData = JSON.parse(jsonString);
+
+    // --- NEW: Shuffle the options for each question ---
+    quizData.forEach(question => {
+      // Using the standard Fisher-Yates shuffle algorithm
+      for (let i = question.options.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [question.options[i], question.options[j]] = [question.options[j], question.options[i]];
+      }
+    });
+    // ----------------------------------------------------
+
     const updatedPlayers = [...roomData.players];
-    // Ensure the quizCounts object exists
-    if (!updatedPlayers[playerIndex].quizCounts) {
-      updatedPlayers[playerIndex].quizCounts = {};
+    if (!updatedPlayers[playerIndex].quizzesTaken) {
+      updatedPlayers[playerIndex].quizzesTaken = {};
     }
-    updatedPlayers[playerIndex].quizCounts[city] = quizCount + 1;
+    updatedPlayers[playerIndex].quizzesTaken[city] = true;
     
     await updateDoc(roomRef, { players: updatedPlayers });
     
-    res.json(quizData); // Send the quiz question to the browser
+    res.json(quizData);
 
   } catch (error) {
     console.error("Error in /generate-quiz:", error);

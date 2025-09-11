@@ -3,12 +3,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebas
 import { getFirestore, doc, getDoc, onSnapshot,updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-// --- NEW QUIZ MODAL ELEMENTS ---
+// --- NEW QUIZ MODAL & STATE MANAGEMENT ---
 const quizModal = document.getElementById('quiz-modal');
 const quizQuestionEl = document.getElementById('quiz-question');
 const quizOptionsEl = document.getElementById('quiz-options');
 const quizFeedbackEl = document.getElementById('quiz-feedback');
-// ------------------------------
+
+let currentQuizData = [];
+let currentQuestionIndex = 0;
+// ------------------------------------
 
 const firebaseConfig = {
   apiKey: "AIzaSyDcoLHRVLcuAu02hz4YXkriRLuJwZv_imc",
@@ -342,6 +345,9 @@ if (gotoBtn) {
 
         players[idx].gold -= cost;
 
+        players[idx].timeTaken += cost/200;
+
+
         // write back updated players array
         await updateDoc(roomRef, {
           players: players
@@ -415,6 +421,8 @@ if (gotoBtn) {
 
             players[idx].gold -= cost;
 
+            players[idx].timeTaken += (cost/100)*3;
+
             // write back updated players array
             await updateDoc(roomRef, {
               players: players
@@ -467,43 +475,91 @@ function renderLeaderboard(players) {
 
 //QUIZ
 
-function displayQuiz(quizData) {
-  // Clear previous options and feedback
-  quizOptionsEl.innerHTML = '';
-  quizFeedbackEl.textContent = '';
+async function displayQuiz(quizArray) {
+  // --- State for the current quiz session ---
+  let currentQuestionIndex = 0;
+  let score = 0;
+  // -----------------------------------------
 
-  // Set the question text
-  quizQuestionEl.textContent = quizData.question;
+  // This function shows one question at a time
+  async function showNextQuestion() {
+    const roomCode = sessionStorage.getItem("roomCode") || new URLSearchParams(window.location.search).get("roomCode");
+    const roomRef = doc(db, "rooms", roomCode);
+    // Clear previous options and feedback
+    quizOptionsEl.innerHTML = '';
+    quizFeedbackEl.textContent = '';
 
-  // Create a button for each option
-  quizData.options.forEach(option => {
-    const button = document.createElement('button');
-    button.textContent = option;
-    button.className = 'option-btn';
-    
-    button.addEventListener('click', () => {
-      // Check if the clicked answer is correct
-      if (option === quizData.correctAnswer) {
-        quizFeedbackEl.textContent = 'Correct!';
-        quizFeedbackEl.style.color = '#4CAF50'; // Green
-        // TODO: Add points or gold to the player
-      } else {
-        quizFeedbackEl.textContent = `Wrong! The correct answer was: ${quizData.correctAnswer}`;
-        quizFeedbackEl.style.color = '#F44336'; // Red
-      }
+    // Check if the quiz is over
+    if (currentQuestionIndex >= quizArray.length) {
+      quizQuestionEl.textContent = "Quiz Complete!";
       
-      // After a short delay, hide the modal
+      // --- LOG THE FINAL SCORE TO THE CONSOLE ---
+      console.log(`Quiz finished! Final Score: ${score} / ${quizArray.length}`);
+
+      const goldEarned = score * 20; // for example: 100 gold per correct answer
+
+// Fetch current room snapshot
+      const snap = await getDoc(roomRef);
+      if (!snap.exists()) return;
+
+      const roomData = snap.data();
+      const players = roomData.players || [];
+
+      // Find current user
+      const idx = players.findIndex(p => p.userId === auth.currentUser.uid);
+      if (idx !== -1) {
+        // Increase gold
+        players[idx].gold = (players[idx].gold || 0) + goldEarned;
+        players[idx].timeTaken += 1;
+        // Save back to Firestore
+        await updateDoc(roomRef, { players: players });
+
+        console.log(`Gold updated! +${goldEarned}, total: ${players[idx].gold}`);
+      }
+      // --------------------------------------------
+
       setTimeout(() => {
         quizModal.style.display = 'none';
-        // Re-enable the main quiz button for the next round
-        document.getElementById('quiz-button').disabled = false; 
-      }, 2500); // 2.5-second delay
-    });
-    
-    quizOptionsEl.appendChild(button);
-  });
+        document.getElementById('quiz-button').disabled = false;
+      }, 2000);
+      return;
+    }
 
-  // Show the modal
+    const questionData = quizArray[currentQuestionIndex];
+    quizQuestionEl.textContent = `Q${currentQuestionIndex + 1}: ${questionData.question}`;
+
+    // Create a button for each option
+    questionData.options.forEach(option => {
+      const button = document.createElement('button');
+      button.textContent = option;
+      button.className = 'option-btn';
+      
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+
+        if (option === questionData.correctAnswer) {
+          quizFeedbackEl.textContent = 'Correct!';
+          quizFeedbackEl.style.color = '#4CAF50';
+          
+          // --- INCREMENT THE SCORE ---
+          score++;
+          // ---------------------------
+
+        } else {
+          quizFeedbackEl.textContent = `Wrong! Correct answer: ${questionData.correctAnswer}`;
+          quizFeedbackEl.style.color = '#F44336';
+        }
+        
+        currentQuestionIndex++;
+        setTimeout(showNextQuestion, 1500);
+      });
+      
+      quizOptionsEl.appendChild(button);
+    });
+  }
+
+  // --- Start the quiz ---
   quizModal.style.display = 'flex';
+  showNextQuestion(); // Show the first question
 }
 
