@@ -49,36 +49,38 @@ let nextDestination = null;
 
 // --- NEW: Function to render player icons --- gaurav_1
 function renderPlayerIcons(players) {
-    if (!imageContainer) return;
+  if (!imageContainer) return;
 
-    // First, remove all previously rendered player icons to prevent duplicates
-    const existingIcons = document.querySelectorAll('.player-icon');
-    existingIcons.forEach(icon => icon.remove());
+  document.querySelectorAll(".player-icon").forEach((icon) => icon.remove());
 
-    // Loop through each player and draw their icon on the map
-    players.forEach(player => {
-        if (player.currentCity && cityCoordinates[player.currentCity]) {
-            const coords = cityCoordinates[player.currentCity];
+  if (!Array.isArray(players)) return;
 
-            // Create the icon element
-            const iconElement = document.createElement('img');
-            iconElement.src = '/img/player-icon.png'; // Make sure you have this image!
-            iconElement.className = 'player-icon';
-            iconElement.title = player.nickname; // Shows player name on hover
+  const user = auth.currentUser; // ✅ get current logged-in user
+  const userPhotoElement = document.querySelector(".user-photo img");
 
-            // Apply coordinates from our object
-            iconElement.style.top = coords.top;
-            if (coords.left) {
-                iconElement.style.left = coords.left;
-            }
-            if (coords.right) {
-                iconElement.style.right = coords.right;
-            }
+  players.forEach((player) => {
+    if (!player) return;
 
-            // Add the icon to the map container
-            imageContainer.appendChild(iconElement);
-        }
-    });
+    const currentCity = player.currentCity;
+    if (!currentCity || !cityCoordinates[currentCity]) return;
+
+    const coords = cityCoordinates[currentCity];
+    const iconIndex = player.iconIndex !== undefined ? player.iconIndex : 4;
+
+    const iconElement = document.createElement("img");
+    iconElement.src = `/img/player-icon${iconIndex}.png`;
+    iconElement.className = "player-icon";
+    iconElement.title = player.nickname || "Anonymous";
+    iconElement.style.top = coords.top;
+    if (coords.left) iconElement.style.left = coords.left;
+    if (coords.right) iconElement.style.right = coords.right;
+
+    imageContainer.appendChild(iconElement);
+
+    if (user && player.userId === user.uid && userPhotoElement) {
+      userPhotoElement.src = `/img/player-icon${iconIndex}.png`;
+    }
+  });
 }
 // -----------------------------------------gaurav_1
 
@@ -466,12 +468,63 @@ if (gotoBtn) {
 }
 
 // wait for auth if necessary
-onAuthStateChanged(auth, (user) => {
-  // if your app requires auth, ensure user exists — else redirect
-  // optional: if you don't rely on auth here, call initPlay() directly
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return goToLobby();
+
+  const roomCode =
+    new URLSearchParams(window.location.search).get("roomCode") ||
+    sessionStorage.getItem("roomCode");
+  if (!roomCode) return goToLobby();
+
+  const roomRef = doc(db, "rooms", roomCode);
+  const snap = await getDoc(roomRef);
+  if (!snap.exists()) return goToLobby();
+
+  const data = snap.data();
+  const players = Array.isArray(data.players) ? data.players : [];
+
+  const existingIdx = players.findIndex((p) => p.userId === user.uid);
+
+  // Generate a list of available icon indexes
+  const usedIcons = players
+    .map((p) => p.iconIndex)
+    .filter((i) => i !== undefined);
+  const totalIcons = 5; // total player icons available
+  let availableIcons = [];
+  for (let i = 0; i < totalIcons; i++) {
+    if (!usedIcons.includes(i)) availableIcons.push(i);
+  }
+
+  let assignedIconIndex;
+  if (availableIcons.length > 0) {
+    assignedIconIndex =
+      availableIcons[Math.floor(Math.random() * availableIcons.length)];
+  } else {
+    // fallback: if all icons are taken, reuse randomly
+    assignedIconIndex = Math.floor(Math.random() * totalIcons);
+  }
+
+  if (existingIdx === -1) {
+    // Add new player with unique icon
+    players.push({
+      userId: user.uid,
+      nickname: user.displayName || "Anonymous",
+      iconIndex: assignedIconIndex,
+      currentCity: "San-Francisco",
+      gold: 1000,
+    });
+    await updateDoc(roomRef, { players });
+  } else {
+    // Ensure existing player has a valid iconIndex
+    if (players[existingIdx].iconIndex === undefined) {
+      players[existingIdx].iconIndex = assignedIconIndex;
+      await updateDoc(roomRef, { players });
+    }
+  }
+
+  // Start listening to changes
   initPlay();
 });
-
 //Leaderboard
 
 const leaderboardList = document.getElementById("leaderboard-list");

@@ -157,6 +157,7 @@ function switchToGameView() {
 
 // --- Core Firestore Logic ---
 
+
 async function startGameWithCountdown(roomCode) {
     const roomRef = doc(db, 'rooms', roomCode);
     let countdown = 6;
@@ -167,7 +168,12 @@ async function startGameWithCountdown(roomCode) {
         allReadyMessage.textContent = `All players are ready! Starting game in ${countdown}...`;
         if (countdown === 0) {
             clearInterval(interval);
-            await updateDoc(roomRef, { gameState: 'in-game' });
+            // --- ADD THE TIMER LOGIC HERE ---
+            await updateDoc(roomRef, { 
+                gameState: 'in-game',
+                gameEndTime: Date.now() + 360 * 1000 // Starts the 2-minute timer now
+            });
+            // -----------------------------
             window.location.href = `/play?roomCode=${encodeURIComponent(roomCode)}`;
         }
     }, 1000);
@@ -208,7 +214,7 @@ createRoomBtn.onclick = async () => {
     try {
         await setDoc(roomRef, {
             roomCode: roomCode, hostId: currentUser.uid, gameState: "lobby",
-            players: [newPlayer], createdAt: new Date(), gameEndTime: Date.now() + 120 * 1000,
+            players: [newPlayer], createdAt: new Date(),
         });
         switchToLobbyView(roomCode);
         listenToRoom(roomCode);

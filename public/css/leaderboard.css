@@ -2,10 +2,11 @@
 
 body {
     font-family: 'Press Start 2P', cursive;
-    background-color: #1a1a2e; /* Dark blue background */
+    background-image: url('../img/mapForGame.png'); 
+    background-repeat: no-repeat;   /* stops tiling */
+    background-size: cover;         /* scale to fill */
     color: #ffffff;
     text-align: center;
-    padding: 20px;
     image-rendering: pixelated; /* Sharp pixels for a retro feel */
 }
 
@@ -16,6 +17,7 @@ body {
     box-shadow: 6px 6px 0px #e43f5a; /* Retro 3D effect */
     background: #162447; /* Slightly lighter blue */
     padding: 20px 40px;
+    opacity: 0.95;
 }
 
 .game-over-title {

@@ -14,8 +14,8 @@ body, html {
 
 .image-container .player-icon {
   position: absolute;
-  width: 40px;   /* Smaller size */
-  height: 40px;  /* Smaller size */
+  width: 55px;   /* Smaller size */
+  height: 55px;  /* Smaller size */
   z-index: 6;    
   pointer-events: none; 
   transform: translate(-50%, -50%); 
