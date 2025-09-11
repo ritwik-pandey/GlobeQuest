@@ -154,4 +154,10 @@ body, html {
 
 .cityy{
     text-align: center;
+    margin-top: -5%;
+}
+
+.goto{
+  margin-left: 45%;
+  margin-top: 3%;
 }

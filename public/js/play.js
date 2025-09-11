@@ -1,6 +1,6 @@
 // public/js/play.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getFirestore, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, onSnapshot,updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -22,6 +22,8 @@ function goToLobby() { window.location.href = "/lobby"; }
 const imageElement = document.getElementById('clickableImage');
 const outputElement = document.getElementById('coordinatesOutput');
 const imageContainer = document.querySelector('.image-container');
+
+let nextDestination = null;
 
 // Add a click event listener to the image
 imageElement.addEventListener('click', (event) => {
@@ -97,10 +99,45 @@ async function initPlay() {
     markers.forEach(marker => {
       marker.onclick = () => {
         if (currentUser.currentCity && marker.id !== currentUser.currentCity) {
+            nextDestination = marker.id; // ✅ save clicked city
             cityElement.textContent = `Next Destination = ${marker.id}`;
         }
       };
     });
+
+    const gotoBtn = document.querySelector('.goto');
+if (gotoBtn) {
+  gotoBtn.addEventListener('click', async () => {
+    
+    if (nextDestination) {
+      console.log(`User wants to go to: ${nextDestination}`);
+      const snap = await getDoc(roomRef);
+      if (!snap.exists()) return;
+
+      const roomData = snap.data();
+      const players = roomData.players || [];
+
+      // find current user
+      const idx = players.findIndex(p => p.userId === auth.currentUser.uid);
+      if (idx !== -1) {
+        // ensure citiesVisited exists
+        players[idx].citiesVisited = players[idx].citiesVisited || [];
+        // push nextDestination
+        players[idx].citiesVisited.push(nextDestination);
+
+        // write back updated players array
+        await updateDoc(roomRef, {
+          players: players
+        });
+
+        console.log("Updated Firestore with new destination!");
+      }
+
+    } else {
+      console.log("No destination selected yet!");
+    }
+  });
+}
   });
 }
 
@@ -127,3 +164,9 @@ function renderLeaderboard(players) {
     leaderboardList.appendChild(li);
   });
 }
+
+//Destination
+ // keep track of clicked city
+
+
+
