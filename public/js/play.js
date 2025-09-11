@@ -8,6 +8,7 @@ const quizModal = document.getElementById('quiz-modal');
 const quizQuestionEl = document.getElementById('quiz-question');
 const quizOptionsEl = document.getElementById('quiz-options');
 const quizFeedbackEl = document.getElementById('quiz-feedback');
+const loaderOverlay = document.getElementById('loader-overlay');
 
 let currentQuizData = [];
 let currentQuestionIndex = 0;
@@ -135,54 +136,54 @@ async function initPlay() {
     if (quizButton) {
       // Find your quizButton event listener inside the initPlay() function
 
-    quizButton.addEventListener('click', async () => {
-      console.log('Fetching quiz question from the server...');
-      
-      // --- Get the required data ---
-      const roomCode = sessionStorage.getItem('roomCode');
-      const userId = auth.currentUser ? auth.currentUser.uid : null;
-      
-      // To get the current city, we need to get the latest room data
-      const db = getFirestore();
-      const roomRef = doc(db, 'rooms', roomCode);
-      const roomSnap = await getDoc(roomRef);
-      
-      if (!roomSnap.exists() || !userId) {
-          alert("Could not find your game data. Please refresh.");
-          return;
-      }
-      
-      const roomData = roomSnap.data();
-      const currentUser = roomData.players.find(p => p.userId === userId);
-      const city = currentUser ? currentUser.currentCity : null;
+    // In public/js/play.js
+quizButton.addEventListener('click', async () => {
+  console.log('Fetching quiz question from the server...');
+  
+  const roomCode = sessionStorage.getItem('roomCode');
+  const userId = auth.currentUser ? auth.currentUser.uid : null;
+  
+  const db = getFirestore();
+  const roomRef = doc(db, 'rooms', roomCode);
+  const roomSnap = await getDoc(roomRef);
+  
+  if (!roomSnap.exists() || !userId) {
+      alert("Could not find your game data. Please refresh.");
+      return;
+  }
+  
+  const roomData = roomSnap.data();
+  const currentUser = roomData.players.find(p => p.userId === userId);
+  const city = currentUser ? currentUser.currentCity : null;
 
-      if (!city) {
-          return;
-      }
-      // -------------------------
+  if (!city) {
+      alert("You must be in a city to take a quiz!");
+      return;
+  }
 
-      try {
-        quizButton.disabled = true;
+  try {
+    quizButton.disabled = true;
+    loaderOverlay.style.display = 'flex'; // <<< SHOW LOADER
 
-        // --- Construct the new URL with query parameters ---
-        const response = await fetch(`/generate-quiz?roomCode=${roomCode}&userId=${userId}&city=${city}`);
-        
-        const data = await response.json();
+    const response = await fetch(`/generate-quiz?roomCode=${roomCode}&userId=${userId}&city=${city}`);
+    const data = await response.json();
 
-        if (!response.ok) {
-          // This will now handle our "limit reached" message
-          throw new Error(data.error || `Server error: ${response.status}`);
-        }
-        
-        displayQuiz(data);
+    if (!response.ok) {
+      throw new Error(data.error || `Server error: ${response.status}`);
+    }
+    
+    // It's important to hide the loader before showing the quiz
+    loaderOverlay.style.display = 'none'; // <<< HIDE LOADER on success
+    displayQuiz(data);
 
-      } catch (error) {
-        console.error("Failed to fetch quiz:", error);
-        // Display the specific error message from the server (e.g., limit reached)
-        alert(error.message); 
-        quizButton.disabled = false;
-      }
-    });
+  } catch (error) {
+    console.error("Failed to fetch quiz:", error);
+    loaderOverlay.style.display = 'none'; // <<< HIDE LOADER on error too
+    alert(error.message); 
+    quizButton.disabled = false;
+  }
+});
+
     }
 
   const roomRef = doc(db, 'rooms', roomCode);
@@ -264,6 +265,7 @@ async function initPlay() {
             nextDestination = marker.id; // ✅ save clicked city
             cityElement.textContent = `Next Destination: ${marker.id}`;
             cityImage.src = `/img/${marker.id}.png`;   
+            animateFlight(currentUser.currentCity, nextDestination);
         }else if(currentUser.currentCity && marker.id === currentUser.currentCity){
             cityElement.textContent = `Current Location: ${marker.id}`;
             cityImage.src = `/img/${marker.id}.png`;  
@@ -647,3 +649,40 @@ async function displayQuiz(quizArray) {
   showNextQuestion(); // Show the first question
 }
 
+function animateFlight(fromCity, toCity) {
+  const svg = document.getElementById("arrows-svg");
+  if (!svg) return;
+
+  const fromCoords = cityCoordinates[fromCity];
+  const toCoords = cityCoordinates[toCity];
+  if (!fromCoords || !toCoords) return;
+
+  const imgRect = imageElement.getBoundingClientRect();
+  const fromX = fromCoords.left
+    ? (parseFloat(fromCoords.left) / 100) * imgRect.width
+    : imgRect.width - (parseFloat(fromCoords.right) / 100) * imgRect.width;
+  const fromY = (parseFloat(fromCoords.top) / 100) * imgRect.height;
+
+  const toX = toCoords.left
+    ? (parseFloat(toCoords.left) / 100) * imgRect.width
+    : imgRect.width - (parseFloat(toCoords.right) / 100) * imgRect.width;
+  const toY = (parseFloat(toCoords.top) / 100) * imgRect.height;
+
+  const midX = (fromX + toX) / 2;
+  const midY = (fromY + toY) / 2 - 50;
+
+  const pathD = `M ${fromX},${fromY} Q ${midX},${midY} ${toX},${toY}`;
+
+  const pathEl = document.getElementById("arrow-path");
+  pathEl.setAttribute("d", pathD);
+  pathEl.style.strokeDashoffset = pathEl.getTotalLength();
+  pathEl.style.strokeDasharray = pathEl.getTotalLength();
+
+  // Trigger CSS animation
+  pathEl.style.animation = "none";
+  void pathEl.offsetWidth; // restart animation
+  pathEl.style.animation = "drawArrow 1s forwards";
+
+  const planeMotion = document.getElementById("plane-motion");
+  planeMotion.beginElement(); // start plane animation
+}

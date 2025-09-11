@@ -18,6 +18,17 @@
         <div class="image-container mb-6">
             <!-- The image. Replace the src with your own image URL. -->
             <img id="clickableImage" src="/img/mapForGame.png" alt="Interactive image" class="w-full h-auto cursor-pointer select-none">
+            <div class="image-container">
+            <img id="clickableImage" src="/img/map.png" />
+            <svg id="arrows-svg" class="arrows-overlay">
+                <path id="arrow-path" class="arrow-path" d="" />
+                <image id="plane-icon" href="/img/plane.png" width="30" height="30">
+                <animateMotion id="plane-motion" dur="2s" fill="freeze" repeatCount="1">
+                    <mpath href="#arrow-path" />
+                </animateMotion>
+                </image>
+            </svg>
+            </div>
             <img id="Delhi" class="marker" src="/img/marker.png" alt="Marker">
             <img id="San-Francisco" class="marker" src="/img/marker.png" alt="Marker">
             <img id="Paris" class="marker" src="/img/marker.png" alt="Marker">
@@ -73,6 +84,10 @@
       </div>
     <p id="quiz-feedback"></p>
   </div>
+  
+</div>
+<div id="loader-overlay" class="loader-container" style="display: none;">
+    <div class="loader-spinner"></div>
 </div>
 </body>
 </html>
