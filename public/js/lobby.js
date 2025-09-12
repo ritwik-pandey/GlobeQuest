@@ -171,7 +171,7 @@ async function startGameWithCountdown(roomCode) {
             // --- ADD THE TIMER LOGIC HERE ---
             await updateDoc(roomRef, { 
                 gameState: 'in-game',
-                gameEndTime: Date.now() + 360 * 1000 // Starts the 2-minute timer now
+                gameEndTime: Date.now() + 150 * 1000 // Starts the 2-minute timer now
             });
             // -----------------------------
             window.location.href = `/play?roomCode=${encodeURIComponent(roomCode)}`;
