@@ -216,7 +216,7 @@ createRoomBtn.onclick = async () => {
     if (!nickname) return showMessage("Please enter a nickname.");
 
     const roomCode = generateRoomCode();
-    const roomRef = doc(db, 'rooms', roomCode);
+    const roomRef = doc(db, 'rooms', roomCode);    
     //HOST GOLD
     const newPlayer = { userId: currentUser.uid, nickname: nickname, isReady: false, gold: 600, currentCity: "San-Francisco", citiesVisited: ["San-Francisco"],timeTaken: 0};
     try {

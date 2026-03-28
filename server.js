@@ -11,13 +11,13 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import leaderboardRoute from './routes/leaderboard.js';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDcoLHRVLcuAu02hz4YXkriRLuJwZv_imc",
-    authDomain: "globequest-4616a.firebaseapp.com",
-    projectId: "globequest-4616a",
-    storageBucket: "globequest-4616a.firebasestorage.app",
-    messagingSenderId: "711348925342",
-    appId: "1:711348925342:web:5c6fd823666c06847ddc8f",
-    measurementId: "G-44WK01SXHC"
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase App on the server
@@ -69,7 +69,7 @@ app.get('/generate-quiz', async (req, res) => {
 
     const roomData = roomSnap.data();
     const playerIndex = roomData.players.findIndex(p => p.userId === userId);
-    
+
     if (playerIndex === -1) {
       return res.status(404).json({ error: "Player not found in this room." });
     }
@@ -88,7 +88,7 @@ app.get('/generate-quiz', async (req, res) => {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    
+
     const prompt = `
       Generate 5 very easy multiple-choice cultural quiz questions about ${city}.
       Your entire response MUST be a valid JSON array of objects. Do not include any text or markdown.
@@ -101,7 +101,7 @@ app.get('/generate-quiz', async (req, res) => {
     const startIndex = jsonText.indexOf('[');
     const endIndex = jsonText.lastIndexOf(']');
     const jsonString = jsonText.substring(startIndex, endIndex + 1);
-    
+
     const quizData = JSON.parse(jsonString);
 
     // --- NEW: Shuffle the options for each question ---
@@ -119,9 +119,9 @@ app.get('/generate-quiz', async (req, res) => {
       updatedPlayers[playerIndex].quizzesTaken = {};
     }
     updatedPlayers[playerIndex].quizzesTaken[city] = true;
-    
+
     await updateDoc(roomRef, { players: updatedPlayers });
-    
+
     res.json(quizData);
 
   } catch (error) {
