@@ -1,93 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GlobeQuest</title>
-    <div class="container">
-  <!-- Leaderboard -->
-    <aside class="leaderboard">
-        <h2>Lobby</h2>
-        <ul id="leaderboard-list"></ul>
-    </aside>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/play.css">
+</head>
 
-        <div class="max-w-4xl w-full p-6 bg-white rounded-2xl shadow-xl flex flex-col items-center text-center">
-    
+<body class="w-full h-screen overflow-hidden relative bg-black font-sans">
+    <audio id="background-music" src="/audio/your-music-file.mp3" loop></audio>
 
-        <!-- Image container -->
-        <div class="image-container mb-6">
-            <!-- The image. Replace the src with your own image URL. -->
-            <img id="clickableImage" src="/img/mapForGame.png" alt="Interactive image" class="w-full h-auto cursor-pointer select-none">
-            <div class="image-container">
-            <img id="clickableImage" src="/img/map.png" />
-            <svg id="arrows-svg" class="arrows-overlay">
-                <path id="arrow-path" class="arrow-path" d="" />
-                <image id="plane-icon" href="/img/plane.png" width="30" height="30">
+    <!-- Map and overlays (kept exactly as in original but fixed z-index) -->
+    <div class="image-container z-0 pointer-events-auto">
+        <img id="clickableImage" src="/img/mapForGame.png" class="w-full h-full object-cover" />
+        <svg id="arrows-svg" class="arrows-overlay">
+            <path id="arrow-path" class="arrow-path" d="" />
+            <image id="plane-icon" href="/img/plane.png" width="30" height="30">
                 <animateMotion id="plane-motion" dur="2s" fill="freeze" repeatCount="1">
                     <mpath href="#arrow-path" />
                 </animateMotion>
-                </image>
-            </svg>
-            </div>
-            <img id="Delhi" class="marker" src="/img/marker.png" alt="Marker">
-            <img id="San-Francisco" class="marker" src="/img/marker.png" alt="Marker">
-            <img id="Paris" class="marker" src="/img/marker.png" alt="Marker">
-            <img id="Cape-town" class="marker" src="/img/marker.png" alt="Marker">
-            <img id="Toronto" class="marker" src="/img/marker.png" alt="Marker">
-
-        </div>
-        <div class="navbar">
-            <div id="game-timer" class="game-timer">
-                Time: 02:00
-            </div>
-            <div class="user-photo">
-                <img src="/img/dp.png" alt="User Photo">
-            </div>
-            <div id="user-gold" class="gold-value">
-                Gold: 0
-            </div>
-            <div class="places-visited">
-                Places visited: 1
-            </div>
-            <div class="city-photo">
-                <img class="city-photo-img" src="/img/San-Francisco.png" alt="City Photo">
-            </div>
-            <button id="quiz-button" aria-label="Start Quiz">
-                <video autoplay loop muted playsinline class="quiz-button-background">
-                    <source src="/img/quiz-video.mp4" type="video/mp4">
-                </video>
-                </button>
-            <br><br><br>
-            <div id="current-city" class="cityy">Current City: Loading...</div>
-            <button class="goto" type="button">Take Flight</button>
-            <div id="flight-cost" class="flight-cost">Cost: Loading...</div>
-
-            <button id="ship" class="gotoship" type="button">Take Ship</button>
-            <div id="ship-cost" class="ship-cost">Cost: Loading...</div>
-
-        </div>
-
-        
+            </image>
+        </svg>
+        <img id="Delhi" class="marker" src="/img/marker.png" alt="Marker">
+        <img id="San-Francisco" class="marker" src="/img/marker.png" alt="Marker">
+        <img id="Paris" class="marker" src="/img/marker.png" alt="Marker">
+        <img id="Cape-town" class="marker" src="/img/marker.png" alt="Marker">
+        <img id="Toronto" class="marker" src="/img/marker.png" alt="Marker">
     </div>
-</div>
 
-    <link rel="stylesheet" href="/css/play.css">
-</head>
-<body>
-    <audio id="background-music" src="/audio/your-music-file.mp3" loop></audio>
-  <div id="playersContainer"></div>
-  <script type="module" src="/js/play.js"></script>
-  <div id="quiz-modal" class="modal-overlay" style="display: none;">
-  <div class="modal-content">
-    <h2 id="quiz-question">Question will load here...</h2>
-    <div id="quiz-options" class="options-container">
-      </div>
-    <p id="quiz-feedback"></p>
-  </div>
-  
-</div>
-<div id="loader-overlay" class="loader-container" style="display: none;">
-    <div class="loader-spinner"></div>
-</div>
+    <!-- UI Overlay container (flexbox approach for responsive layout replacing absolute numbers) -->
+    <div
+        class="absolute inset-x-0 bottom-0 top-0 z-10 pointer-events-none flex flex-col justify-between p-2 md:p-6 overflow-y-auto overflow-x-hidden">
+
+        <!-- Top Section: Leaderboard -->
+        <aside
+            class="leaderboard pointer-events-auto !mt-0 !ml-0 !static md:!absolute md:!top-6 md:!left-6 !max-w-xs !w-48 sm:!w-64 !h-auto !max-h-64 overflow-y-auto shrink-0 mb-4">
+            <h2>Lobby</h2>
+            <ul id="leaderboard-list"></ul>
+        </aside>
+
+        <!-- Bottom Section: Navbar -->
+        <div
+            class="navbar pointer-events-auto !mt-auto !ml-0 !relative md:!absolute md:!bottom-6 md:!left-1/2 md:!-translate-x-1/2 !w-full sm:!w-11/12 !max-w-5xl !h-auto flex flex-wrap md:flex-nowrap justify-between content-center items-center p-3 sm:p-4 gap-2 sm:gap-4 !bg-cover !bg-center rounded-2xl shadow-2xl z-20 mx-auto">
+
+            <!-- Left Profile & Stats -->
+            <div class="flex items-center gap-2 sm:gap-4 w-full md:w-auto justify-center md:justify-start">
+                <div
+                    class="user-photo !mt-0 !mr-0 !w-12 !h-12 sm:!w-16 sm:!h-16 shrink-0 border-2 sm:border-4 border-white">
+                    <img src="/img/dp.png" alt="User Photo">
+                </div>
+                <div class="flex flex-col text-center md:text-left">
+                    <div id="user-gold" class="gold-value !m-0 !text-lg sm:!text-2xl">Gold: 0</div>
+                    <div class="places-visited !m-0 !text-sm sm:!text-lg">Places visited: 1</div>
+                    <div id="game-timer" class="game-timer !m-0 !text-base sm:!text-xl">Time: 02:00</div>
+                </div>
+            </div>
+
+            <!-- Middle: Current City Info -->
+            <div class="flex flex-col items-center w-full md:w-auto">
+                <div id="current-city" class="cityy !m-0 font-bold text-sm sm:text-base">Current City: Loading...</div>
+                <div class="city-photo !mt-2 !mr-0 !w-16 !h-16 sm:!w-24 sm:!h-24 shadow-md hidden sm:flex">
+                    <img class="city-photo-img" src="/img/San-Francisco.png" alt="City Photo">
+                </div>
+            </div>
+
+            <!-- Right: Actions -->
+            <div class="flex flex-row justify-center gap-4 sm:gap-8 items-center mt-2 md:mt-0 w-full md:w-auto">
+                <div class="flex flex-col items-center">
+                    <button
+                        class="goto !static !m-0 !text-sm sm:!text-base !px-4 !py-2 shadow-lg active:scale-95 transition"
+                        type="button">Take Flight</button>
+                    <div id="flight-cost" class="flight-cost !static !m-0 !mt-1 !text-xs sm:!text-sm text-center">Cost:
+                        Loading...</div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <button id="ship"
+                        class="gotoship !static !m-0 !text-sm sm:!text-base !px-4 !py-2 shadow-lg active:scale-95 transition"
+                        type="button">Take Ship</button>
+                    <div id="ship-cost" class="ship-cost !static !m-0 !mt-1 !text-xs sm:!text-sm text-center">Cost:
+                        Loading...</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Floating Quiz Button -->
+    <button id="quiz-button" aria-label="Start Quiz"
+        class="!fixed !top-4 !right-4 md:!top-8 md:!right-8 !w-16 !h-16 sm:!w-20 sm:!h-20 hover:scale-105 active:scale-95 transition pointer-events-auto border-2 border-white rounded-full z-40 overflow-hidden shadow-2xl">
+        <video autoplay loop muted playsinline class="quiz-button-background !static w-full h-full object-cover">
+            <source src="/img/quiz-video.mp4" type="video/mp4">
+        </video>
+    </button>
+
+    <div id="playersContainer"></div>
+    <script type="module" src="/js/play.js"></script>
+
+    <!-- Modals -->
+    <div id="quiz-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content !w-[90%] !max-w-lg p-4 sm:p-6 !m-auto">
+            <h2 id="quiz-question" class="!text-lg sm:!text-2xl !mb-4">Question will load here...</h2>
+            <div id="quiz-options" class="options-container !grid-cols-1 sm:!grid-cols-2 !gap-2 sm:!gap-4"></div>
+            <p id="quiz-feedback" class="!mt-2 !text-base sm:!text-lg"></p>
+        </div>
+    </div>
+
+    <div id="loader-overlay" class="loader-container" style="display: none;">
+        <div class="loader-spinner"></div>
+    </div>
 </body>
+
 </html>
