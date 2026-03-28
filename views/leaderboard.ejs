@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Over! - GlobeQuest</title>
+    <!-- Link to our new retro stylesheet -->
+    <link rel="stylesheet" href="/css/leaderboard.css">
+    <!-- Google Font for the retro vibe -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <audio id="background-music" src="/audio/your-music-file.mp3" loop></audio>
+    <div class="container">
+        <h1 class="game-over-title">GAME OVER</h1>
+        
+        <div class="podium-container">
+            <h2 class="section-title">-- PODIUM --</h2>
+            <% if (winners.length > 0) { %>
+                <% winners.forEach((player, index) => { %>
+                    <div class="player-row winner rank-<%= index + 1 %>">
+                        <span class="rank">#<%= index + 1 %></span>
+                        <span class="player-name"><%= player.nickname %></span>
+                        <span class="player-stat">⏱️ <%= player.timeTaken ? player.timeTaken + 'hr' : 'N/A' %></span>
+                        <span class="player-stat">💰 <%= player.gold %></span>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p class="no-winner-text">> NOBODY REACHED DELHI! <</p>
+            <% } %>
+        </div>
+
+        <div class="others-container">
+            <h2 class="section-title">-- OTHER PLAYERS --</h2>
+            <% if (others.length > 0) { %>
+                 <% others.forEach(player => { %>
+                    <div class="player-row other">
+                        <span class="rank">-</span>
+                        <span class="player-name"><%= player.nickname %></span>
+                        <span class="player-stat">📍 <%= player.currentCity %></span>
+                        <span class="player-stat">💰 <%= player.gold %></span>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p class="info-text">> ALL PLAYERS REACHED DELHI! <</p>
+            <% } %>
+        </div>
+    </div>
+    <script>
+        window.addEventListener('load', () => {
+            const music = document.getElementById('background-music');
+            if (music) {
+                music.volume = 0.3;
+                music.play().catch(error => {
+                    console.error("Music autoplay was blocked on the leaderboard page.", error);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

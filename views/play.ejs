@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlobeQuest</title>
+    <div class="container">
+  <!-- Leaderboard -->
+    <aside class="leaderboard">
+        <h2>Lobby</h2>
+        <ul id="leaderboard-list"></ul>
+    </aside>
+
+        <div class="max-w-4xl w-full p-6 bg-white rounded-2xl shadow-xl flex flex-col items-center text-center">
+    
+
+        <!-- Image container -->
+        <div class="image-container mb-6">
+            <!-- The image. Replace the src with your own image URL. -->
+            <img id="clickableImage" src="/img/mapForGame.png" alt="Interactive image" class="w-full h-auto cursor-pointer select-none">
+            <div class="image-container">
+            <img id="clickableImage" src="/img/map.png" />
+            <svg id="arrows-svg" class="arrows-overlay">
+                <path id="arrow-path" class="arrow-path" d="" />
+                <image id="plane-icon" href="/img/plane.png" width="30" height="30">
+                <animateMotion id="plane-motion" dur="2s" fill="freeze" repeatCount="1">
+                    <mpath href="#arrow-path" />
+                </animateMotion>
+                </image>
+            </svg>
+            </div>
+            <img id="Delhi" class="marker" src="/img/marker.png" alt="Marker">
+            <img id="San-Francisco" class="marker" src="/img/marker.png" alt="Marker">
+            <img id="Paris" class="marker" src="/img/marker.png" alt="Marker">
+            <img id="Cape-town" class="marker" src="/img/marker.png" alt="Marker">
+            <img id="Toronto" class="marker" src="/img/marker.png" alt="Marker">
+
+        </div>
+        <div class="navbar">
+            <div id="game-timer" class="game-timer">
+                Time: 02:00
+            </div>
+            <div class="user-photo">
+                <img src="/img/dp.png" alt="User Photo">
+            </div>
+            <div id="user-gold" class="gold-value">
+                Gold: 0
+            </div>
+            <div class="places-visited">
+                Places visited: 1
+            </div>
+            <div class="city-photo">
+                <img class="city-photo-img" src="/img/San-Francisco.png" alt="City Photo">
+            </div>
+            <button id="quiz-button" aria-label="Start Quiz">
+                <video autoplay loop muted playsinline class="quiz-button-background">
+                    <source src="/img/quiz-video.mp4" type="video/mp4">
+                </video>
+                </button>
+            <br><br><br>
+            <div id="current-city" class="cityy">Current City: Loading...</div>
+            <button class="goto" type="button">Take Flight</button>
+            <div id="flight-cost" class="flight-cost">Cost: Loading...</div>
+
+            <button id="ship" class="gotoship" type="button">Take Ship</button>
+            <div id="ship-cost" class="ship-cost">Cost: Loading...</div>
+
+        </div>
+
+        
+    </div>
+</div>
+
+    <link rel="stylesheet" href="/css/play.css">
+</head>
+<body>
+    <audio id="background-music" src="/audio/your-music-file.mp3" loop></audio>
+  <div id="playersContainer"></div>
+  <script type="module" src="/js/play.js"></script>
+  <div id="quiz-modal" class="modal-overlay" style="display: none;">
+  <div class="modal-content">
+    <h2 id="quiz-question">Question will load here...</h2>
+    <div id="quiz-options" class="options-container">
+      </div>
+    <p id="quiz-feedback"></p>
+  </div>
+  
+</div>
+<div id="loader-overlay" class="loader-container" style="display: none;">
+    <div class="loader-spinner"></div>
+</div>
+</body>
+</html>
