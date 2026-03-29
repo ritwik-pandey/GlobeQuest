@@ -2,7 +2,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 // --- ALL IMPORTS AT THE TOP ---
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
-import { initializeApp } from 'firebase/app'; // <-- Add this new import
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously } from "firebase/auth";
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -22,6 +23,8 @@ const firebaseConfig = {
 
 // Initialize Firebase App on the server
 const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
+signInAnonymously(auth).catch((error) => console.error("Server Firebase sign-in error:", error));
 
 // Import your route files
 import lobbyRoute from './routes/lobby.js'; // Make sure file has .js extension if needed
